@@ -303,21 +303,46 @@ reschedule-mono/
 
 ## Getting Started
 
-### Prerequisites
+### Tested On
 
-- **Node.js** >= 18
-- **pnpm** >= 10
-- **just** >= 1.0 (`npm install -g just-install`)
+| Spec | Value |
+|---|---|
+| **OS** | macOS 11.7.10 (Big Sur) |
+| **Chip** | Apple M1 (arm64) |
+| **RAM** | 8 GB |
+| **Node.js** | 18.20.8 |
+| **npm** | 10.8.2 |
+| **pnpm** | 10.30.3 |
 
-### Clone & Run
+> **No Docker yet.** The project runs directly on the host machine. Docker support is planned but not implemented.
+
+### Full Setup (Copy-Paste)
+
+This installs everything from scratch — Node tooling, the monorepo, and all dependencies:
 
 ```bash
+# 1. Install pnpm (if you don't have it)
+npm install -g pnpm
+
+# 2. Install just command runner
+npm install -g just-install
+
+# 3. Clone the monorepo with both submodules
 git clone --recurse-submodules https://github.com/flaviusp23/reschedule-mono.git
 cd reschedule-mono
-just install      # install deps for engine (pnpm) + UI (npm)
-just test         # run all 204 engine tests
-just ui           # start demo UI at http://localhost:5173
+
+# 4. Install all dependencies (engine + UI)
+just install
+
+# 5. Verify — run all 204 engine tests
+just test
+
+# 6. Start the demo UI
+just ui
+# Opens at http://localhost:5173
 ```
+
+That's it. After step 6 you should see the Gantt timeline in your browser.
 
 ### All Justfile Commands
 
