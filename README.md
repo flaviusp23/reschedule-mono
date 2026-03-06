@@ -307,28 +307,46 @@ reschedule-mono/
 
 - **Node.js** >= 18
 - **pnpm** >= 10
+- **just** >= 1.0 (`npm install -g just-install`)
 
-### Clone
+### Clone & Run
 
 ```bash
 git clone --recurse-submodules https://github.com/flaviusp23/reschedule-mono.git
 cd reschedule-mono
+just install      # install deps for engine (pnpm) + UI (npm)
+just test         # run all 204 engine tests
+just ui           # start demo UI at http://localhost:5173
 ```
 
-### Install & Verify (Engine)
+### All Justfile Commands
+
+| Command | Description |
+|---|---|
+| `just install` | Install dependencies in both submodules |
+| `just test` | Run all 204 engine tests |
+| `just ui` | Start the demo UI dev server |
+| `just build` | Build both engine and UI |
+| `just typecheck` | TypeScript strict-mode check on the engine |
+| `just demo` | Run the CLI scenario runner |
+| `just pull` | Pull all submodules to latest |
+| `just status` | Show git status of all submodules |
+
+### Manual Setup (Without Just)
 
 ```bash
+# Engine
 cd Reschedule-Flow
 pnpm install
 pnpm typecheck    # TypeScript strict mode — zero errors
 pnpm test         # Run all 204 tests
 pnpm dev          # Run CLI scenario runner
-```
-
-### Build
-
-```bash
 pnpm build        # Bundles to dist/ via tsup (ESM + .d.ts declarations)
+
+# Demo UI
+cd ../reschedule-ui
+npm install
+npm run dev       # Starts Vite dev server
 ```
 
 ---
