@@ -1,0 +1,6 @@
+[submodule "Reschedule-Flow"]
+	path = Reschedule-Flow
+	url = https://github.com/flaviusp23/Reschedule-Flow.git
+[submodule "reschedule-ui"]
+	path = reschedule-ui
+	url = https://github.com/flaviusp23/reschedule-ui.git
