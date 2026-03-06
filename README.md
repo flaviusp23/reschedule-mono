@@ -191,7 +191,7 @@ The type system has two parallel layers: **DTOs** (I/O boundary, ISO 8601 string
 | `prepTimeMinutes` | `number?` | `number?` | Optional preparation time, added to duration |
 | `isRegulatoryHold` | `boolean` | `boolean` | If true, task is immovable |
 | `dependsOnTaskIds` | `string[]` | `string[]` | Prerequisite task IDs (DAG edges) |
-| `taskType` | `string` | `string` | Free-form label (e.g., `settlement`, `regulatory-review`) |
+| `taskType` | `SettlementTaskType` | `SettlementTaskType` | Spec-defined union (`marginCheck`, `fundTransfer`, `disbursement`, `complianceScreen`, `reconciliation`, `regulatoryHold`) + extensible via `string & {}` |
 
 ### Settlement Channel
 
@@ -290,8 +290,8 @@ reschedule-mono/
 │   │   ├── utils/
 │   │   │   └── operating-hours.ts    # Operating hours engine (5 exported functions)
 │   │   └── main.ts                   # CLI scenario runner
-│   ├── tests/                        # 146 tests across 8 test files
-│   ├── data/scenarios/               # 5 JSON scenario files
+│   ├── tests/                        # 204 tests across 9 test files
+│   ├── data/scenarios/               # 14 JSON scenario files
 │   └── package.json
 ├── reschedule-ui/                <-- git submodule (demo UI only, not production)
 ├── docs/
@@ -321,7 +321,7 @@ cd reschedule-mono
 cd Reschedule-Flow
 pnpm install
 pnpm typecheck    # TypeScript strict mode — zero errors
-pnpm test         # Run all 146 tests
+pnpm test         # Run all 204 tests
 pnpm dev          # Run CLI scenario runner
 ```
 
@@ -420,10 +420,12 @@ console.log(result.explanation);    // Human-readable summary
 ### CLI Scenario Runner
 
 ```bash
-pnpm dev
+pnpm dev                                              # Run all 14 scenarios
+npx tsx src/main.ts 01-delay-cascade.json              # Run single scenario by filename
+npx tsx src/main.ts data/scenarios/12-dense-packing.json  # Run by full path
 ```
 
-Reads all `data/scenarios/*.json` files and runs them through the engine, printing a formatted changes table:
+Reads all `data/scenarios/*.json` files (or a specific file) and runs them through the engine, printing a formatted changes table:
 
 ```
 ======================================================================
@@ -448,7 +450,7 @@ Scenario: Delay Cascade
 
 ```bash
 cd Reschedule-Flow
-pnpm test              # Run all 146 tests
+pnpm test              # Run all 204 tests
 pnpm test:watch        # Interactive watch mode
 pnpm test -- tests/engine/reflow-engine.test.ts   # Run specific file
 ```
@@ -460,17 +462,18 @@ pnpm test -- tests/engine/reflow-engine.test.ts   # Run specific file
 | `converters.test.ts` | 20 | DTO/domain round-trip, ISO parsing, UTC offset validation, timezone validation, day-of-week mapping |
 | `dag.test.ts` | 12 | Linear chains, diamonds, independent tasks, cycle detection, self-dependency, determinism, tiebreaker ordering |
 | `operating-hours.test.ts` | 35 | isWithinOperatingHours, snapToNextOperatingWindow, getAvailableSlots, calculateEndDate, DST handling, blackout avoidance, multi-day spanning |
-| `reflow-engine.test.ts` | 28 | Dependency push, channel conflicts, operating hours snap, blackout avoidance, regulatory holds, cascades, multi-dep, impossible schedules, zero-duration tasks, prepTime, convergence |
+| `reflow-engine.test.ts` | 36 | Dependency push, channel conflicts, operating hours snap, blackout avoidance, regulatory holds, cascades, multi-dep, impossible schedules, zero-duration tasks, prepTime, convergence, duplicate ID rejection, operating hours validation |
 | `constraint-checker.test.ts` | 8 | Operating hours violations, overlap detection, dependency ordering, blackout violations, adjacent task allowance |
 | `event-handler.test.ts` | 14 | All 3 event types, immutability (original not mutated), validation errors, idempotent hold marking |
 | `reflow-service.test.ts` | 8 | Facade delegation, result structure, ISO string output, input immutability, error propagation |
-| `scenarios.test.ts` | 21 | End-to-end integration through full DTO pipeline using real JSON scenario files |
+| `scenarios.test.ts` | 64 | End-to-end integration through full DTO pipeline using real JSON scenario files (14 scenarios) |
+| `edge-blackout-start.test.ts` | 7 | Edge cases: conflict→blackout push, blackout at exact task end, cascading through blackouts |
 
 ---
 
 ## Scenarios
 
-Five scenario files in `data/scenarios/` exercise different constraint combinations:
+Fourteen scenario files in `data/scenarios/` exercise different constraint combinations:
 
 ### 01 — Delay Cascade
 
@@ -491,6 +494,42 @@ Three independent tasks competing for the same channel. T-030 is delayed from 8A
 ### 05 — Impossible Schedule
 
 A 240-minute regulatory hold (10AM-2PM) on a channel with an 11AM-1PM blackout window. The hold overlaps the blackout and cannot be moved. The engine correctly throws `ImpossibleScheduleError` with code `IMPOSSIBLE_SCHEDULE`.
+
+### 06 — Weekend Rollover + DST
+
+Friday delay cascades over the weekend with DST spring-forward (March 8, 2026). T-050 delayed to 2PM Friday, T-051 spans Friday→Monday, T-052 lands Monday 9AM EDT (not EST).
+
+### 07 — Regulatory Hold Routing
+
+A regulatory hold locks 10AM-12PM. A 240-minute task starting at 8AM must route around it, landing at 12PM-4PM via channel conflict resolution.
+
+### 08 — Diamond Dependency
+
+DAG diamond: `T-070 → T-071 (CH-002) + T-072 (CH-001) → T-073 (CH-002)`. Root delayed to 10AM. Parallel branches run on different channels at 11AM. Join node waits for both at 12PM.
+
+### 09 — Prep Time
+
+Tasks with `prepTimeMinutes` that extend total work: 60+60=120min, 30+30=60min, then 60min plain. Validates prep time is included in scheduling math.
+
+### 10 — Zero-Duration Milestone
+
+A 0-minute checkpoint (T-091) between two real tasks. Milestone has `startDate === endDate`, consumes no channel time, but still respects dependency ordering.
+
+### 11 — Multi-Channel Parallel
+
+T-100 (CH-001) and T-101 (CH-002) run in parallel. T-102 depends on both. Only T-101 is delayed — T-100 is unchanged, T-102 waits for the slower branch.
+
+### 12 — Dense Packing
+
+8 tasks fill a full Friday 8AM-4PM in a linear chain. A 1-hour delay cascades through all 7 downstream tasks. The last task rolls over the weekend + DST to Monday 8AM EDT.
+
+### 13 — Multiple Blackouts
+
+Two pre-existing blackouts (10-11AM, 2-3PM) fragment Monday. A 360-minute task spans all available gaps: [8-10)+[11-14)+[15-16)=360min. Dependent task rolls to Tuesday.
+
+### 14 — Channel Offline Mid-Schedule
+
+`channelOffline` event injects an 11AM-12PM blackout. T-131 (120min starting 10AM) works 60min before the blackout, pauses, then resumes at 12PM. T-132 pushed to 1PM.
 
 ---
 
