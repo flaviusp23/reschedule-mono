@@ -7,26 +7,24 @@ pull:
 # Install dependencies in both submodules
 install:
     cd Reschedule-Flow && pnpm install
-    cd reschedule-ui && pnpm install
+    cd reschedule-ui && npm install
 
-# Start the UI dev server
-dev:
-    cd reschedule-ui && pnpm dev
+# Start the demo UI dev server
+ui:
+    cd reschedule-ui && npm run dev
 
 # Run tests across both submodules
 test:
     cd Reschedule-Flow && pnpm test
-    cd reschedule-ui && pnpm test
 
 # Build both projects
 build:
     cd Reschedule-Flow && pnpm build
-    cd reschedule-ui && pnpm build
+    cd reschedule-ui && npm run build
 
 # Typecheck both projects
 typecheck:
     cd Reschedule-Flow && pnpm typecheck
-    cd reschedule-ui && pnpm typecheck
 
 # Show git status of all submodules
 status:
