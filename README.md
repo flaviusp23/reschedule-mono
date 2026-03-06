@@ -20,7 +20,7 @@ Built for [Capital33](https://capital33.com)'s financial operations platform.
 | Sample data (3+ scenarios) | Done | 14 scenario JSON files covering all constraint types |
 | README with setup + approach | Done | This document |
 | GitHub repo | Done | [reschedule-mono](https://github.com/flaviusp23/reschedule-mono) (monorepo) + [Reschedule-Flow](https://github.com/flaviusp23/Reschedule-Flow) (engine) |
-| Loom demo | Done | *(link TBD)* |
+| Loom demo | Done | [Watch demo](https://www.loom.com/share/5ff338de41d042aaaa25adbebab8ad0c) |
 
 ### Bonus
 
