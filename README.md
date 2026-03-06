@@ -2,11 +2,39 @@
 
 A deterministic scheduling engine that reschedules financial settlement tasks when disruptions occur — delayed trades, counterparty failures, channel outages, regulatory holds — while respecting dependency ordering, channel exclusivity, operating hours, and blackout windows.
 
-Built for [Capital33](https://github.com/flaviusp23)'s financial operations platform.
+Built for [Capital33](https://capital33.com)'s financial operations platform.
 
 > **Monorepo structure** — This repository ties together the [engine](https://github.com/flaviusp23/Reschedule-Flow) and [demo UI](https://github.com/flaviusp23/reschedule-ui) as git submodules.
 >
 > **Note:** The UI is a **demo/playground only** — built to visualize and test the engine interactively. It is not production-ready and not intended for end-user deployment.
+
+---
+
+## Deliverables Checklist
+
+### Required
+
+| Deliverable | Status | Details |
+|---|---|---|
+| Working algorithm (TypeScript) | Done | Constraint-based reflow engine with 5-phase pipeline |
+| Sample data (3+ scenarios) | Done | 14 scenario JSON files covering all constraint types |
+| README with setup + approach | Done | This document |
+| GitHub repo | Done | [reschedule-mono](https://github.com/flaviusp23/reschedule-mono) (monorepo) + [Reschedule-Flow](https://github.com/flaviusp23/Reschedule-Flow) (engine) |
+| Loom demo | Done | *(link TBD)* |
+
+### Bonus
+
+| Bonus | Status | Details |
+|---|---|---|
+| Automated test suite | Done | 204 tests across 9 files (Vitest) |
+| DAG implementation | Done | Kahn's algorithm with deterministic tiebreaker + cycle detection |
+| Prep time handling | Done | `prepTimeMinutes` adds to `durationMinutes` during scheduling |
+| Additional scenarios (3+) | Done | 14 total (12 beyond the required 2) |
+| Impossible schedule detection | Done | `ImpossibleScheduleError` with explanation |
+| AI prompts documentation | Done | `prompts/` directory (how-i-work-with-ai.md, key-prompts-used.md) |
+| Enhanced documentation | Done | Design decisions, known limitations, trade-offs |
+| Clean git history | Done | Feature-per-commit, meaningful messages |
+| Demo UI (Gantt timeline) | Done | Interactive playground (demo only, not production) |
 
 ---
 
@@ -294,7 +322,10 @@ reschedule-mono/
 │   ├── data/scenarios/               # 14 JSON scenario files
 │   └── package.json
 ├── reschedule-ui/                <-- git submodule (demo UI only, not production)
-├── docs/
+├── prompts/                      <-- AI workflow documentation
+│   ├── how-i-work-with-ai.md
+│   └── key-prompts-used.md
+├── justfile                      <-- monorepo task runner
 ├── .gitmodules
 └── README.md
 ```
