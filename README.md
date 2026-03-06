@@ -5,6 +5,8 @@ A deterministic scheduling engine that reschedules financial settlement tasks wh
 Built for [Capital33](https://github.com/flaviusp23)'s financial operations platform.
 
 > **Monorepo structure** — This repository ties together the [engine](https://github.com/flaviusp23/Reschedule-Flow) and [demo UI](https://github.com/flaviusp23/reschedule-ui) as git submodules.
+>
+> **Note:** The UI is a **demo/playground only** — built to visualize and test the engine interactively. It is not production-ready and not intended for end-user deployment.
 
 ---
 
@@ -291,7 +293,7 @@ reschedule-mono/
 │   ├── tests/                        # 146 tests across 8 test files
 │   ├── data/scenarios/               # 5 JSON scenario files
 │   └── package.json
-├── reschedule-ui/                <-- git submodule (demo UI)
+├── reschedule-ui/                <-- git submodule (demo UI only, not production)
 ├── docs/
 ├── .gitmodules
 └── README.md
@@ -571,7 +573,7 @@ All ISO 8601 date strings must include an explicit UTC offset (e.g., `-05:00` or
 | Repository | Description |
 |---|---|
 | [Reschedule-Flow](https://github.com/flaviusp23/Reschedule-Flow) | The scheduling engine (this README documents it) |
-| [reschedule-ui](https://github.com/flaviusp23/reschedule-ui) | Demo UI — Gantt-style timeline visualization |
+| [reschedule-ui](https://github.com/flaviusp23/reschedule-ui) | Demo UI only — Gantt-style timeline visualization for testing the engine (not production-ready) |
 | [reschedule-mono](https://github.com/flaviusp23/reschedule-mono) | Monorepo tying engine + UI together as submodules |
 
 ## License
